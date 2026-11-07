@@ -1,0 +1,306 @@
+\documentclass[letterpaper]{article}
+\usepackage[letterpaper, margin=0.5in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{enumitem}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{url}
+\usepackage{mathtools}
+\title{APM1110\_FA8\_Valdez\_ChanceJayden.pdf}
+\author{\url{https://github.com/ChanceValdez/APM1110-FA8}}
+\date{November 2026}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+% Smaller text for hints
+\newcommand{\hint}[1]{\par{\footnotesize\textit{Hint:} #1\par}}
+
+\begin{document}
+\maketitle
+\section*{README}
+
+These are the typeset solutions to Formative Assessment 8 of APM1110 (Probability and Probability Distributions) at Far Eastern University. 
+
+The solutions involve R, which I used to speed up the repetitive computation of combinations, along with calculus, proof-writing concepts, and, above all, probability concepts, as the course name implies.
+
+My handwritten scratch work is also in the GitHub repository as proof that I did these solutions independently. I typeset them as a second pass to double-check my work. The repository contains everything: the \LaTeX{} code, the R code, the handwritten scratch work, and the compiled PDF.
+
+\textbf{Note:} The final solutions are the ones in this typeset document. The handwritten solutions may lack insight and some of what I want to convey, and my handwriting is of questionable quality. Please grade the compiled PDF, since it holds my final solutions, and use the handwritten work only to verify that I did them independently.
+
+\section*{Assessment Items (30 Points)}
+
+\textbf{1.} (6 points) An urn contains 10 red, 8 black, and 7 green balls. One of the colors is chosen at random (meaning that the chosen color is equally likely to be any of the 3 colors), and then 4 balls are randomly chosen from the urn. Let $X$ be the number of these balls that are of the chosen color.
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+    \item (2 points) Find $P(X = 0)$.
+    
+    Let $C$ be the chosen color. By the law of total probability,
+    \[
+    P(X=0) = \sum_{\mathclap{c \, \in \, \{\text{Red, Black, Green}\}}} P(X=0 \mid C=c)\,P(C=c).
+    \]
+    Given $C = c$, $X = 0$ means that all 4 balls are not of the chosen color, $c$. Since there are $10 + 8 + 7 = 25$ balls in total, the total number of equally likely draws is
+    \[
+        \binom{25}{4} = 12650.
+    \]
+    Counting the draws that avoid each color (computed in R with \texttt{choose()}):
+    \[
+        P(X=0 \mid \text{Red}) = \frac{\binom{15}{4}}{12650} = \frac{1365}{12650}, \quad
+        P(X=0 \mid \text{Black}) = \frac{\binom{17}{4}}{12650} = \frac{2380}{12650}, \quad
+        P(X=0 \mid \text{Green}) = \frac{\binom{18}{4}}{12650} = \frac{3060}{12650}.
+    \]
+\textit{R Code used for the Combinations:}
+\begin{verbatim}
+total_ways <- choose(25, 4)
+ways_if_red <- choose(15, 4)
+ways_if_black <- choose(17, 4)
+ways_if_green <- choose(18, 4)
+
+print(total_ways)
+## [1] 12650
+print(ways_if_red)
+## [1] 1365
+print(ways_if_black)
+## [1] 2380
+print(ways_if_green)
+## [1] 3060
+\end{verbatim}
+    Weighting each color by $P(C=c) = \tfrac{1}{3}$:
+    \[
+        P(X=0) = \frac{1}{3}\left[\frac{1365 + 2380 + 3060}{12650}\right] = \frac{1361}{7590} \approx 0.1793.
+    \]
+    $\boxed{\text{Therefore: } P(X=0)\approx 0.1793}$
+    \item (2 points) Let $X_i$ equal 1 if the $i$th ball selected is of the chosen color, and let it equal 0 otherwise. Find:
+    \[
+        P(X_i = 1), \quad i = 1, 2, 3, 4.
+    \]
+    By symmetry, the $i$th ball is a uniformly random ball from the urn. So, given a color, $P(X_i = 1 \mid C=c)$ is that color's fraction of the 25 balls. Weighting each color by $\frac{1}{3}$:
+    \[
+        P(X_i = 1) = \frac{1}{3}\left[\frac{10}{25} + \frac{8}{25} + \frac{7}{25}\right] = \frac{1}{3}.
+    \]
+    This holds because no matter what color the $i$th ball turns out to be, our independent guess $C$ has a $\frac{1}{3}$ chance of matching it. Thus,
+    \[
+        \boxed{P(X_i = 1) = \frac{1}{3} \quad \text{for } i = 1, 2, 3, 4.}
+    \]
+    \item (2 points) Find $E[X]$.
+    \hint{Express $X$ in terms of $X_1$, $X_2$, $X_3$, and $X_4$.}
+    Linearity of Expectation states that for any random variables $Y_1, \dots, Y_n$ (independent or not),
+    \[
+        E[Y_1 + Y_2 + \cdots + Y_n] = E[Y_1] + E[Y_2] + \cdots + E[Y_n].
+    \]
+    Since $X = X_1 + X_2 + X_3 + X_4$, linearity gives
+    \[
+        E[X] = E[X_1] + E[X_2] + E[X_3] + E[X_4].
+    \]
+    Each $X_i$ is an indicator, so $E[X_i] = P(X_i = 1) = \tfrac{1}{3}$ by (b). Linearity applies even though the draws are not independent. Hence
+    \[
+    E[X] = E[X_1] + E[X_2] + E[X_3] + E[X_4] = \frac{1}{3} + \frac{1}{3} + \frac{1}{3} + \frac{1}{3} = \boxed{\frac{4}{3} \approx 1.3333}.
+\]
+\end{enumerate}
+\textbf{2.} (8 points) The random variable $X$ is said to have the Yule-Simon distribution if
+\[
+    P(X = n) = \frac{4}{n(n+1)(n+2)}, \quad n \ge 1.
+\]
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+    \item (3 points) Show that the preceding is actually a probability mass function. That is, show that
+    \[
+        \sum_{n=1}^{\infty} P(X = n) = 1.
+    \]
+    \hint{For (a), first use that
+    \[
+        \frac{1}{n(n+1)(n+2)} = \frac{1}{2}\left[\frac{1}{n(n+1)} - \frac{1}{(n+1)(n+2)}\right],
+    \]
+    then use that
+    \[
+        \frac{k}{n(n+k)} = \frac{1}{n} - \frac{1}{n+k}.
+    \]}
+    \textbf{Proof.} A Probability Mass Function (PMF) requires the following: 
+    \begin{enumerate}[label=\roman*., leftmargin=*]
+        \item Every value must be nonnegative.
+        \item The values must add up to 1.
+    \end{enumerate}
+
+    \textit{Nonnegativity:} For $n \ge 1$,
+    \[
+        P(X=n) = \frac{4}{n(n+1)(n+2)} > 0.
+    \]
+
+    \textit{Total Sum:} Substituting and using the hint,
+     \[
+        \sum_{n=1}^{\infty} P(X=n) = 4\sum_{n=1}^{\infty}\frac{1}{n(n+1)(n+2)}
+        = 4\sum_{n=1}^{\infty}\frac{1}{2}\left[\frac{1}{n(n+1)} - \frac{1}{(n+1)(n+2)}\right]
+        = 2\sum_{n=1}^{\infty}\left[\frac{1}{n(n+1)} - \frac{1}{(n+1)(n+2)}\right].
+    \]
+    Let $S_N = \sum_{n=1}^{N} P(X=n)$. Then
+    \[
+        S_N = 2\left[\left(\frac{1}{2} - \frac{1}{6}\right) + \left(\frac{1}{6} - \frac{1}{12}\right) + \left(\frac{1}{12} - \frac{1}{20}\right) + \cdots + \left(\frac{1}{N(N+1)} - \frac{1}{(N+1)(N+2)}\right)\right].
+    \]
+    Each term's second part cancels the next term's first part (telescoping), so only the first and last pieces remain:
+    \[
+        S_N = 2\left[\frac{1}{2} - \frac{1}{(N+1)(N+2)}\right].
+    \]
+    An infinite series is the limit of its partial sums as $N \to \infty$, and since $\frac{1}{(N+1)(N+2)} \to 0$,
+    \[
+        \sum_{n=1}^{\infty} P(X=n) = \lim_{N\to\infty} S_N = 2\cdot\frac{1}{2} = 1.
+    \]
+    Since $P(X=n) > 0$ for all $n \ge 1$ and the total sum equals 1, the Yule-Simon distribution is a PMF. \hfill $\blacksquare$
+\item (2 points) Show that
+    \[
+        E[X] = 2.
+    \]
+
+    \textbf{Proof.} To begin, we use the definition of expected value for discrete random variables, $E[X] = \sum_{n=1}^{\infty} n\,P(X=n)$. Substituting and canceling $n$,
+    \[
+        \sum_{n=1}^{\infty} n\,P(X=n) = \sum_{n=1}^{\infty}\frac{4n}{n(n+1)(n+2)} = 4\sum_{n=1}^{\infty}\frac{1}{(n+1)(n+2)}.
+    \]
+    Using Partial Fraction Decomposition, write $\frac{1}{(n+1)(n+2)} = \frac{A}{n+1} + \frac{B}{n+2}$. Then $1 = A(n+2) + B(n+1)$, which gives $A = 1$ and $B = -1$, so
+    \[
+        4\sum_{n=1}^{\infty}\left[\frac{1}{n+1} - \frac{1}{n+2}\right].
+    \]
+    Let $S_N = \sum_{n=1}^{N} n\,P(X=n)$. Then
+    \[
+        S_N = 4\left[\left(\frac{1}{2} - \frac{1}{3}\right) + \left(\frac{1}{3} - \frac{1}{4}\right) + \cdots + \left(\frac{1}{N+1} - \frac{1}{N+2}\right)\right] = 4\left[\frac{1}{2} - \frac{1}{N+2}\right].
+    \]
+    Since $\frac{1}{N+2} \to 0$ as $N \to \infty$,
+    \[
+        E[X] = \lim_{N\to\infty} S_N = 4\cdot\frac{1}{2} = 2. \quad \blacksquare
+    \]
+    \item (3 points) Show that
+    \[
+        E[X^2] = \infty.
+    \]
+    \textbf{Proof.} For a discrete random variable, $E[X^2] = \sum_{n=1}^{\infty} n^2\,P(X=n)$. Substituting and canceling one factor of $n$,
+    \[
+            E[X^2] = \sum_{n=1}^{\infty}\frac{4n^2}{n(n+1)(n+2)} = \sum_{n=1}^{\infty}\frac{4n}{(n+1)(n+2)} = 4\sum_{n=1}^{\infty}\frac{n}{n^2 + 3n + 2}.
+    \]
+    We use the Limit Comparison Test, which states that if $\sum a_n$ and $\sum b_n$ are series with positive terms and $\lim_{n\to\infty}\frac{a_n}{b_n} = c$, where $c$ is finite and $c > 0$, then either both series converge or both diverge.
+
+    Let $a_n = \dfrac{n}{n^2+3n+2}$ and $b_n = \dfrac{1}{n}$ (the harmonic series, which diverges). Both have positive terms for $n \ge 1$. Then
+    \[
+        \lim_{n\to\infty}\frac{a_n}{b_n} = \lim_{n\to\infty}\frac{n^2}{n^2+3n+2}.
+    \]
+    This is of the form $\frac{\infty}{\infty}$, so applying L'H\^opital's rule twice,
+    \[
+        \lim_{n\to\infty}\frac{2n}{2n+3} = \lim_{n\to\infty}\frac{2}{2} = 1.
+    \]
+    Since $c = 1$ is finite and greater than 0, and $\sum \frac{1}{n}$ diverges, $\sum a_n$ also diverges. Multiplying a divergent series by 4 keeps it divergent. Therefore, $E[X^2] = 4\sum a_n = \infty$. \hfill $\blacksquare$
+\end{enumerate}
+\textbf{3.} (4 points) The probability density function (PDF) of $X$ is given by
+\[
+    f(x) =
+    \begin{cases}
+        a + bx^2, & 0 \le x \le 1, \\
+        0, & \text{otherwise.}
+    \end{cases}
+\]
+If $E[X] = \frac{3}{5}$, find the values of $a$ and $b$.
+
+\textbf{Solution.} We are given the following: 
+\begin{enumerate}
+    \item $f$ is a PDF on $[0,1]$ and $0$ otherwise.
+    \item $E[X] = \frac{3}{5}$
+\end{enumerate}
+
+\textit{Equation 1.} For $f$ to be a PDF, its integral over $[0,1]$ must equal 1:
+\[
+    \int_0^1 (a + bx^2)\,dx = \left[ax + \frac{b}{3}x^3\right]_0^1 = a + \frac{b}{3} = 1.
+\]
+
+\textit{Equation 2.} By the definition of $E[X]$ for a continuous random variable,
+\[
+    E[X] = \int_0^1 x(a + bx^2)\,dx = \left[\frac{a}{2}x^2 + \frac{b}{4}x^4\right]_0^1 = \frac{a}{2} + \frac{b}{4} = \frac{3}{5}.
+\]
+
+From Equation 1, $a = 1 - \frac{b}{3}$. Substituting this into Equation 2 gives
+\begin{align*}
+    \frac{1 - \frac{b}{3}}{2} + \frac{b}{4} &= \frac{3}{5} \\[4pt]
+    \frac{3 - b}{6} + \frac{b}{4} &= \frac{3}{5} \\[4pt]
+    10(3 - b) + 15b &= 36 \\[4pt]
+    30 - 10b + 15b &= 36 \\[4pt]
+    30 + 5b &= 36 \\[4pt]
+    5b &= 6 \implies \boxed{b = \frac{6}{5}}.
+\end{align*}
+
+
+Substituting $b=\frac{6}{5}$ back into $a = 1 - \frac{b}{3}$:
+\[
+    a = 1 - \frac{\frac{6}{5}}{3} = 1 - \frac{6}{15} = 1 - \frac{2}{5} = \boxed{\frac{3}{5}}.
+\]
+
+\textit{Check.} Equation 1: $\frac{3}{5} + \frac{1}{3}\cdot\frac{6}{5} = \frac{3}{5} + \frac{2}{5} = 1$. Equation 2: $\frac{1}{2}\cdot\frac{3}{5} + \frac{1}{4}\cdot\frac{6}{5} = \frac{3}{10} + \frac{3}{10} = \frac{3}{5}$. Also, $f(x) \ge 0$ on $[0,1]$ since $a, b > 0$ and $x^2 \ge 0$, so $f$ is a valid PDF.
+
+Therefore, $\boxed{a = \frac{3}{5}, \quad b = \frac{6}{5}}$.
+
+
+\bigskip
+\textbf{4.} (4 points) Let $X$ be a random variable having expected value $\mu$ and variance $\sigma^2$. Find the expected value and variance of
+\[
+    Y = \frac{X - \mu}{\sigma}.
+\]
+
+\textbf{Solution.} By definition, $\mu = E[X]$ and $\sigma^2 = \operatorname{Var}(X) = E[(X-\mu)^2]$, with $\sigma > 0$. Rewrite $Y$ in the form $aX + b$:
+\[
+    Y = \frac{1}{\sigma}X - \frac{\mu}{\sigma}, \qquad a = \frac{1}{\sigma},\ b = -\frac{\mu}{\sigma}.
+\]
+
+Using the linear transformation rule for expectation, $E[a X + b] = a E[X] + b$:
+\[
+    E[Y] = \frac{1}{\sigma}E[X] - \frac{\mu}{\sigma} = \frac{\mu}{\sigma} - \frac{\mu}{\sigma} = 0.
+\]
+
+Using the linear transformation rule for variance, $\operatorname{Var}(a X + b) = a^2\operatorname{Var}(X)$:
+\[
+    \operatorname{Var}(Y) = \left(\frac{1}{\sigma}\right)^2\sigma^2 = 1.
+\]
+
+Therefore, $\boxed{E[Y] = 0 \text{ and} \operatorname{Var}(Y) = 1}$.
+
+\textbf{5.} (8 points) Let $X$ and $Y$ be independent Poisson random variables with parameters $\lambda_1 = 2$ and $\lambda_2 = 3$, respectively. Let $W = X + Y$.
+
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+    \item (3 points) Using the property of sums of independent random variables, derive the moment generating function (MGF) $M_W(t)$ of $W$.
+
+    First, let $Z$ be a Poisson random variable with parameter $\lambda$. Its moment generating function is derived in Example 7b of my instructor's lecture slides (\textit{M5. Functions of Random Variables}, Slide 49), and is reproduced here:
+    \[
+        M_Z(t) = E[e^{tZ}] = \sum_{k=0}^{\infty} e^{tk}\,\frac{e^{-\lambda}\lambda^k}{k!}
+        = e^{-\lambda}\sum_{k=0}^{\infty}\frac{(\lambda e^t)^k}{k!}
+        = e^{-\lambda}e^{\lambda e^t} = e^{\lambda(e^t - 1)}.
+    \]
+    Substituting $\lambda_1 = 2$ and $\lambda_2 = 3$ gives the individual MGFs of $X$ and $Y$ respectively:
+    \[
+        M_X(t) = e^{2(e^t - 1)}, \qquad M_Y(t) = e^{3(e^t - 1)}.
+    \]
+    Since $X$ and $Y$ are independent, the moment generating function of the sum is the product of the individual moment generating functions:
+    \[
+        M_W(t) = M_X(t)\cdot M_Y(t) = e^{2(e^t-1)}\cdot e^{3(e^t-1)} = \boxed{e^{5(e^t - 1)}}
+    \]
+
+    \item (2 points) Based on the uniqueness property of MGFs, identify the probability distribution and parameter(s) of $W$.
+
+    The uniqueness property states that if a moment generating function exists and is finite in some region about $t = 0$, then it uniquely determines the distribution. Comparing $M_Z(t) = e^{\lambda(e^t-1)}$ with $M_W(t) = e^{5(e^t-1)}$, they match with $\lambda = 5$. Therefore, $\boxed{W \text{ has a Poisson}(5) \text{ distribution}}$.
+
+    \item (3 points) Determine the expected value $E[W]$ and the second moment $E[W^2]$ by successively differentiating $M_W(t)$ and evaluating it at $t = 0$.
+
+    Differentiating $M_W(t) = e^{5(e^t-1)}$ with the Chain Rule ($\frac{d}{dt} e^u = e^u \cdot u'$):
+\[
+    \frac{d}{dt}\,e^{5(e^t-1)} = e^{5(e^t-1)}\cdot\frac{d}{dt}\left[5(e^t-1)\right] = 5e^t\,e^{5(e^t-1)}.
+\]
+Evaluating this at $t = 0$ gives the expected value:
+\[
+    E[W] = \left.\frac{d}{dt}M_W(t)\right|_{t=0} = 5(1)\,e^{0} = 5.
+\]
+Differentiating again with the Product Rule ($\frac{d}{dt}(uv) = u'v + uv'$, with $u = 5e^t$ and $v = e^{5e^t - 5}$):
+\[
+    \frac{d}{dt}\left[\left(5e^t\right)\left(e^{5e^t - 5}\right)\right]
+    = \left(5e^t\right)\left(5e^t\right)\left(e^{5e^t - 5}\right) + \left(5e^t\right)\left(e^{5e^t - 5}\right)
+    = 25e^{2t}\left(e^{5e^t - 5}\right) + \left(5e^t\right)\left(e^{5e^t - 5}\right).
+\]
+Evaluating this at $t = 0$ gives the second moment:
+\[
+    E[W^2] = \left.\frac{d^2}{dt^2}M_W(t)\right|_{t=0} = 25(1)\left(e^{5(1) - 5}\right) + 5(1)\left(e^{5(1) - 5}\right) = 25 + 5 = 30.
+\]
+\textit{Check.} A Poisson random variable has a mean equal to its variance: $\operatorname{Var}(W) = E[W^2] - (E[W])^2 = 30 - 5^2 = 5 = E[W]$.
+
+Therefore, $\boxed{E[W] = 5}$ and $\boxed{E[W^2] = 30}$.
+\end{enumerate}
+\end{document}
